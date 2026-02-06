@@ -11,151 +11,128 @@ class ViewController: UIViewController {
     
     override func loadView() {
         let background = UIView()
-        background.backgroundColor = .systemGray
+        background.backgroundColor = .black
         self.view = background
     }
     
     //MARK: viewDidLoad
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        view.addSubview(labelSum)
-        view.addSubview(buttonOne)
-        view.addSubview(buttonTwo)
-        view.addSubview(buttonThree)
-        view.addSubview(buttonFour)
-        view.addSubview(buttonFive)
-        view.addSubview(buttonSix)
-        view.addSubview(buttonEight)
-        view.addSubview(buttonSeven)
-        view.addSubview(buttonNine)
-        view.addSubview(buttonZero)
-        view.addSubview(buttonPlus)
-        buttonPlus.updateBackgroundColor(.systemOrange)
-        view.addSubview(buttonMinus)
-        buttonMinus.updateBackgroundColor(.systemOrange)
-        view.addSubview(buttonMulti)
-        buttonMulti.updateBackgroundColor(.systemOrange)
-        view.addSubview(buttonDivision)
-        buttonDivision.updateBackgroundColor(.systemOrange)
-        view.addSubview(buttonSmooth)
-        view.addSubview(buttonComma)
 
-        let swipe = UISwipeGestureRecognizer(target: self, action: #selector(handlerSwipe))
+        let swipe = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe))
         swipe.direction = .right
-        labelSum.addGestureRecognizer(swipe)
+        view.addGestureRecognizer(swipe)
         
-        buttonOne.addTarget(self, action: #selector(one), for: .touchUpInside)
-        buttonTwo.addTarget(self, action: #selector(two), for: .touchUpInside)
-        buttonThree.addTarget(self, action: #selector(three), for: .touchUpInside)
-        buttonFour.addTarget(self, action: #selector(four), for: .touchUpInside)
-        buttonFive.addTarget(self, action: #selector(five), for: .touchUpInside)
-        buttonSix.addTarget(self, action: #selector(six), for: .touchUpInside)
-        buttonSeven.addTarget(self, action: #selector(seven), for: .touchUpInside)
-        buttonEight.addTarget(self, action: #selector(ehgiht), for: .touchUpInside)
-        buttonNine.addTarget(self, action: #selector(nine), for: .touchUpInside)
-        buttonZero.addTarget(self, action: #selector(zero), for: .touchUpInside)
-        buttonOne.addTarget(self, action: #selector(numberPressed(_:)), for: .touchUpInside)
+        view.addSubview(expressionLabel)
+        view.addSubview(resultLabel)
+        
+        let buttons = [
+            buttonOne, buttonTwo, buttonThree,
+            buttonFour, buttonFive, buttonSix,
+            buttonSeven, buttonEight, buttonNine,
+            buttonZero,
+            buttonPlus, buttonMinus, buttonMulti, buttonDivision,
+            buttonComma, buttonEqual
+        ]
+        
+        buttons.forEach { view.addSubview($0) }
+        [buttonPlus, buttonMinus, buttonMulti, buttonDivision].forEach { $0.updateBackgroundColor(.systemOrange)}
+        
+        let numbersButton = [
+            buttonZero,
+            buttonOne, buttonTwo, buttonThree,
+            buttonFour, buttonFive, buttonSix,
+            buttonSeven, buttonEight, buttonNine
+        ]
+        numbersButton.forEach { $0.addTarget(self, action: #selector(numberPressed(_:)), for: .touchUpInside)}
+        
         buttonPlus.addTarget(self, action: #selector(plusPressed), for: .touchUpInside)
-        buttonSmooth.addTarget(self, action: #selector(equalPressed), for: .touchUpInside)
-        }
+        buttonMinus.addTarget(self, action: #selector(minusPresses), for: .touchUpInside)
+        buttonMulti.addTarget(self, action: #selector(multiPressed), for: .touchUpInside)
+        buttonDivision.addTarget(self, action: #selector(dividepressed), for: .touchUpInside)
+        buttonEqual.addTarget(self, action: #selector(equalPressed), for: .touchUpInside)
+        buttonComma.addTarget(self, action: #selector(decimalPressed), for: .touchUpInside)
+    }
     
     //MARK: Frame
     override func viewDidLayoutSubviews() {
         print(view.frame.width)
         
         super.viewDidLayoutSubviews()
+        
+        let buttonSize: CGFloat = 90
+        let spacing: CGFloat = 10
+        let startX: CGFloat = 5
+        let startY = view.bounds.midY
 
-        buttonOne.frame = CGRect(x: view.bounds.minX + 5,
-                                 y: view.bounds.midY,
-                                 width: 90,
-                                 height: 90)
-        buttonTwo.frame = CGRect(x: view.bounds.minX + 105,
-                                 y: view.bounds.midY,
-                                 width: 90,
-                                 height: 90)
-        buttonThree.frame = CGRect(x: view.bounds.minX + 205,
-                                   y: view.bounds.midY,
-                                   width: 90,
-                                   height: 90)
+        let positions = [
+            (buttonOne, 0, 0), (buttonTwo, 1, 0), (buttonThree, 2, 0),
+            (buttonFour, 0, 1), (buttonFive, 1, 1), (buttonSix, 2, 1),
+            (buttonSeven, 0, 2), (buttonEight, 1, 2), (buttonNine, 2, 2),
+            (buttonZero, 1, 3)
+        ]
         
+        for (button, col, row) in positions {
+            button.frame = CGRect(
+                x: startX + CGFloat(col) * (buttonSize + spacing),
+                y: startY + CGFloat(row) * (buttonSize + spacing),
+                width: buttonSize,
+                height: buttonSize
+            )
+        }
         
-        buttonFour.frame = CGRect(x: view.bounds.minX + 5,
-                                  y: view.bounds.midY + 100,
-                                  width: 90,
-                                  height: 90)
-        buttonFive.frame = CGRect(x: view.bounds.minX + 105,
-                                  y: view.bounds.midY + 100,
-                                  width: 90,
-                                  height: 90)
-        buttonSix.frame = CGRect(x: view.bounds.minX + 205,
-                                 y: view.bounds.midY + 100,
-                                 width: 90,
-                                 height: 90)
+        let ops = [
+            (buttonPlus, 3, 0),
+            (buttonMinus, 3, 1),
+            (buttonDivision, 3, 2),
+            (buttonMulti, 3, 3),
+            (buttonEqual, 2, 3),
+            (buttonComma, 0, 3)
+        ]
         
+        for (button, col, row) in ops {
+            button.frame = CGRect(
+                x: startX + CGFloat(col) * (buttonSize + spacing),
+                y: startY + CGFloat(row) * (buttonSize + spacing),
+                width: buttonSize,
+                height: buttonSize
+            )
+        }
+
+        expressionLabel.frame = CGRect(
+            x: 10,
+            y: view.bounds.midY - 200,
+            width: view.bounds.width - 20,
+            height: 90
+        )
         
-        buttonSeven.frame = CGRect(x: view.bounds.minX + 5,
-                                   y: view.bounds.midY + 200,
-                                   width: 90,
-                                   height: 90)
-        buttonEight.frame = CGRect(x: view.bounds.minX + 105,
-                                   y: view.bounds.midY + 200,
-                                   width: 90,
-                                   height: 90)
-        buttonNine.frame = CGRect(x: view.bounds.minX + 205,
-                                  y: view.bounds.midY + 200,
-                                  width: 90,
-                                  height: 90)
-        
-        buttonZero.frame = CGRect(x: view.bounds.minX + 105,
-                                  y: view.bounds.midY + 300,
-                                  width: 90,
-                                  height: 90)
-        
-        
-        buttonPlus.frame = CGRect(x: view.bounds.minX + 305,
-                                  y: view.bounds.midY,
-                                  width: 90,
-                                  height: 90)
-        buttonMinus.frame = CGRect(x: view.bounds.minX + 305,
-                                  y: view.bounds.midY + 100,
-                                  width: 90,
-                                  height: 90)
-        buttonDivision.frame = CGRect(x: view.bounds.minX + 305,
-                                  y: view.bounds.midY + 200,
-                                  width: 90,
-                                  height: 90)
-        buttonMulti.frame = CGRect(x: view.bounds.minX + 305,
-                                  y: view.bounds.midY + 300,
-                                  width: 90,
-                                  height: 90)
-        buttonSmooth.frame = CGRect(x: view.bounds.minX + 205,
-                                  y: view.bounds.midY + 300,
-                                  width: 90,
-                                  height: 90)
-        buttonComma.frame = CGRect(x: view.bounds.minX + 5,
-                                  y: view.bounds.midY + 300,
-                                  width: 90,
-                                  height: 90)
-        
-        labelSum.frame = CGRect(x: view.bounds.minX + 10,
-                                  y: view.bounds.midY - 150,
-                                width: view.bounds.maxX - 20,
-                                  height: 90)
+        resultLabel.frame = CGRect(
+            x: 10,
+            y: expressionLabel.frame.maxY - 10,
+            width: view.bounds.width - 20,
+            height: 90
+        )
     }
     
     //MARK: Label
-    private var labelSum: UILabel = {
-        let label = UILabel()
+    private let expressionLabel: UILabel = {
+       let label = UILabel()
+        label.text = ""
+        label.font = .systemFont(ofSize: 50)
+        label.textAlignment = .right
+        label.textColor = .lightGray
+        label.numberOfLines = 1
+        return label
+    }()
+    
+    private let resultLabel: UILabel = {
+       let label = UILabel()
         label.text = "0"
         label.font = .systemFont(ofSize: 70)
         label.textAlignment = .right
         label.adjustsFontSizeToFitWidth = true
         label.minimumScaleFactor = 0.5
-        label.numberOfLines = 1
         label.textColor = .white
-        
-        label.isUserInteractionEnabled = true
         return label
     }()
     
@@ -172,176 +149,137 @@ class ViewController: UIViewController {
     let buttonZero = ButtonNumbers(text: "0")
     let buttonPlus = ButtonNumbers(text: "+")
     let buttonMinus = ButtonNumbers(text: "-")
-    let buttonMulti = ButtonNumbers(text: "•")
+    let buttonMulti = ButtonNumbers(text: "×")
     let buttonComma = ButtonNumbers(text: ",")
     let buttonDivision = ButtonNumbers(text: "÷")
-    let buttonSmooth = ButtonNumbers(text: "=")
+    let buttonEqual = ButtonNumbers(text: "=")
     
-    @objc private func handlerSwipe() {
-        guard let text = labelSum.text, text != "0" else { return }
-        
-        let newText = String(text.dropLast())
-        labelSum.text = newText.isEmpty ? "0" : newText
-    }
-    
-    @objc private func one() {
-        let numberLabel = labelSum.text ?? "0"
-        
-        if numberLabel == "0" {
-            labelSum.text = "1"
-        } else {
-            labelSum.text = numberLabel + "1"
-        }
-    }
-    
-    @objc private func two() {
-        let numberLabel = labelSum.text ?? "0"
-        
-        if numberLabel == "0" {
-            labelSum.text = "2"
-        } else {
-            labelSum.text = numberLabel + "2"
-        }
-    }
-    
-    @objc private func three() {
-        let numberLabel = labelSum.text ?? "0"
-        
-        if numberLabel == "0" {
-            labelSum.text = "3"
-        } else {
-            labelSum.text = numberLabel + "3"
-        }
-    }
 
-    @objc private func four() {
-        let numberLabel = labelSum.text ?? "0"
-        
-        if numberLabel == "0" {
-            labelSum.text = "4"
-        } else {
-            labelSum.text = numberLabel + "4"
-        }
-    }
-
-    @objc private func five() {
-        let numberLabel = labelSum.text ?? "0"
-        
-        if numberLabel == "0" {
-            labelSum.text = "5"
-        } else {
-            labelSum.text = numberLabel + "5"
-        }
-    }
-
-    @objc private func six() {
-        let numberLabel = labelSum.text ?? "0"
-        
-        if numberLabel == "0" {
-            labelSum.text = "6"
-        } else {
-            labelSum.text = numberLabel + "6"
-        }
-    }
-
-    @objc private func seven() {
-        let numberLabel = labelSum.text ?? "0"
-        
-        if numberLabel == "0" {
-            labelSum.text = "7"
-        } else {
-            labelSum.text = numberLabel + "7"
-        }
-    }
-
-    @objc private func ehgiht() {
-        let numberLabel = labelSum.text ?? "0"
-        
-        if numberLabel == "0" {
-            labelSum.text = "8"
-        } else {
-            labelSum.text = numberLabel + "8"
-        }
-    }
-
-    @objc private func nine() {
-        let numberLabel = labelSum.text ?? "0"
-        
-        if numberLabel == "0" {
-            labelSum.text = "9"
-        } else {
-            labelSum.text = numberLabel + "9"
-        }
-    }
-
-    @objc private func zero() {
-        let numberLabel = labelSum.text ?? "0"
-        
-        if numberLabel == "0" {
-            labelSum.text = "0"
-        } else {
-            labelSum.text = numberLabel + "0"
-        }
-    }
-    
+    //MARK: Logic
     private var firstNumber: Double?
     private var currentOperation: Operation?
     private var isTypingNumber = false
     
     enum Operation {
-        case add
+        case add, subtract, multiply, divide
     }
     
     @objc private func numberPressed(_ sender: UIButton) {
+        animateButton(sender)
+        
         guard let digit = sender.titleLabel?.text else { return }
         
-        if labelSum.text == "0" || !isTypingNumber {
-            labelSum.text = digit
+        if resultLabel.text == "0" || !isTypingNumber {
+            resultLabel.text = digit
             isTypingNumber = true
         } else {
-            labelSum.text! += digit
+            resultLabel.text! += digit
+        }
+    }
+
+    @objc private func decimalPressed() {
+        animateButton(buttonComma)
+        if !(resultLabel.text?.contains(".") ?? false) {
+            resultLabel.text! += "."
+            isTypingNumber = true
         }
     }
     
     @objc private func plusPressed() {
-        guard let text = labelSum.text,
-              let number = Double(text) else { return }
-        
-        firstNumber = number
-        currentOperation = .add
-        isTypingNumber = false
-        
-        labelSum.text = "\(text) + "
+        animateButton(buttonPlus)
+        setOperation(.add)
+    }
+    @objc private func minusPresses() {
+        animateButton(buttonMinus)
+        setOperation(.subtract)
+    }
+    @objc private func multiPressed() {
+        animateButton(buttonMulti)
+        setOperation(.multiply)
+    }
+    @objc private func dividepressed() {
+        animateButton(buttonDivision)
+        setOperation(.divide)
+    }
+    
+    private func setOperation(_ operation: Operation) {
+        if let text = resultLabel.text, let number = Double(text) {
+            firstNumber = number
+            currentOperation = operation
+            isTypingNumber = false
+            
+            let symbol: String
+            switch operation {
+            case .add: symbol = "+"
+            case .subtract: symbol = "-"
+            case .multiply: symbol = "×"
+            case .divide: symbol = "÷"
+            }
+            expressionLabel.text = "\(formatResult(number)) \(symbol)"
+        }
     }
     
     @objc private func equalPressed() {
+        animateButton(buttonEqual)
+        
         guard
             let operation = currentOperation,
             let first = firstNumber,
-            let text = labelSum.text,
+            let text = resultLabel.text,
             let second = Double(text)
         else { return }
         
-        let components = text.split(separator: " ")
-        guard let second = Double(components.last ?? "") else { return }
-                
         let result: Double
+        let symbol: String
         
         switch operation {
-        case .add:
-            result = first + second
+        case .add: result = first + second
+            symbol = "+"
+        case .subtract: result = first - second
+            symbol = "-"
+        case .multiply: result = first * second
+            symbol = "×"
+        case .divide: result = first / second
+            symbol = "÷"
         }
-        labelSum.text = formatResult(result)
+        
+        expressionLabel.text = "\(formatResult(first)) \(symbol) \(formatResult(second))"
+        resultLabel.text = formatResult(result)
         
         firstNumber = nil
         currentOperation = nil
         isTypingNumber = false
     }
+    
+    @objc private func handleSwipe() {
+        guard var text = resultLabel.text, text.count > 0 else { return }
+        
+        text.removeLast()
+        
+        if text.isEmpty {
+            resultLabel.text = "0"
+            isTypingNumber = false
+        } else {
+            resultLabel.text = text
+        }
+    }
+    
     private func formatResult(_ value: Double) -> String {
         if value.truncatingRemainder(dividingBy: 1) == 0 {
             return String(Int(value))
         } else {
             return String(value)
+        }
+    }
+    
+    private func animateButton(_ button: UIButton) {
+        UIView.animate(withDuration: 0.1,
+                       animations: {
+            button.transform = CGAffineTransform(scaleX: 0.92, y: 0.92)
+        }) { _ in
+            UIView.animate(withDuration: 0.1) {
+                button.transform = .identity
+            }
         }
     }
 }
@@ -352,5 +290,4 @@ class ViewController: UIViewController {
 }
 
 
-//referwf
-//erfer
+

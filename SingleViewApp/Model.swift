@@ -19,7 +19,7 @@ open class ButtonNumbers: UIButton {
     public func setupButton(text: String) {
         setTitle(text, for: .normal)
         titleLabel?.font = .systemFont(ofSize: 50)
-        backgroundColor = .systemGray2
+        backgroundColor = .systemGray
         tintColor = .white
         layer.cornerRadius = 45
         
