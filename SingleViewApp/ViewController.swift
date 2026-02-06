@@ -27,6 +27,7 @@ class ViewController: UIViewController {
         view.addSubview(resultLabel)
         
         let buttons = [
+            buttonAC,
             buttonOne, buttonTwo, buttonThree,
             buttonFour, buttonFive, buttonSix,
             buttonSeven, buttonEight, buttonNine,
@@ -34,7 +35,7 @@ class ViewController: UIViewController {
             buttonPlus, buttonMinus, buttonMulti, buttonDivision,
             buttonComma, buttonEqual
         ]
-        
+        buttonAC.updateBackgroundColor(.systemRed)
         buttons.forEach { view.addSubview($0) }
         [buttonPlus, buttonMinus, buttonMulti, buttonDivision].forEach { $0.updateBackgroundColor(.systemOrange)}
         
@@ -52,6 +53,7 @@ class ViewController: UIViewController {
         buttonDivision.addTarget(self, action: #selector(dividepressed), for: .touchUpInside)
         buttonEqual.addTarget(self, action: #selector(equalPressed), for: .touchUpInside)
         buttonComma.addTarget(self, action: #selector(decimalPressed), for: .touchUpInside)
+        buttonAC.addTarget(self, action: #selector(acPressed), for: .touchUpInside)
     }
     
     //MARK: Frame
@@ -98,10 +100,15 @@ class ViewController: UIViewController {
                 height: buttonSize
             )
         }
+        
+        buttonAC.frame = CGRect(x: startX,
+                                y: startY - (buttonSize + spacing),
+                                width: buttonSize,
+                                height: buttonSize)
 
         expressionLabel.frame = CGRect(
             x: 10,
-            y: view.bounds.midY - 200,
+            y: view.bounds.midY - 280,
             width: view.bounds.width - 20,
             height: 90
         )
@@ -153,6 +160,8 @@ class ViewController: UIViewController {
     let buttonComma = ButtonNumbers(text: ",")
     let buttonDivision = ButtonNumbers(text: "÷")
     let buttonEqual = ButtonNumbers(text: "=")
+    
+    let buttonAC = ButtonNumbers(text: "AC")
     
 
     //MARK: Logic
@@ -281,6 +290,17 @@ class ViewController: UIViewController {
                 button.transform = .identity
             }
         }
+    }
+    
+    @objc private func acPressed() {
+        animateButton(buttonAC)
+        
+        resultLabel.text = "0"
+        firstNumber = nil
+        currentOperation = nil
+        isTypingNumber = false
+        
+        expressionLabel.text = ""
     }
 }
 
