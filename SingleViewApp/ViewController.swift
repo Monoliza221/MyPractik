@@ -165,8 +165,8 @@ class ViewController: UIViewController {
     
 
     //MARK: Logic
-    private var firstNumber: Double?
-    private var currentOperation: Operation?
+    private var numbers: [Double] = []
+    private var operations: [Operation] = []
     private var isTypingNumber = false
     
     enum Operation {
@@ -212,9 +212,10 @@ class ViewController: UIViewController {
     }
     
     private func setOperation(_ operation: Operation) {
-        if let text = resultLabel.text, let number = Double(text) {
-            firstNumber = number
-            currentOperation = operation
+        if let text = resultLabel.text?.replacingOccurrences(of: ",", with: "."),
+            let number = Double(text) {
+            numbers.append(number)
+            operations.append(operation)
             isTypingNumber = false
             
             let symbol: String
@@ -224,52 +225,74 @@ class ViewController: UIViewController {
             case .multiply: symbol = "×"
             case .divide: symbol = "÷"
             }
-            expressionLabel.text = "\(formatResult(number)) \(symbol)"
+            expressionLabel.text! += "\(formatResult(number)) \(symbol)"
+            resultLabel.text = "0"
         }
     }
     
     @objc private func equalPressed() {
         animateButton(buttonEqual)
+//
+        if let text = resultLabel.text?.replacingOccurrences(of: ",", with: "."),
+        let lastNumber = Double(text) {
+            numbers.append(lastNumber)
+        }
+            
+        var result = numbers.first ?? 0
         
-        guard
-            let operation = currentOperation,
-            let first = firstNumber,
-            let text = resultLabel.text,
-            let second = Double(text)
-        else { return }
-        
-        let result: Double
-        let symbol: String
-        
-        switch operation {
-        case .add: result = first + second
-            symbol = "+"
-        case .subtract: result = first - second
-            symbol = "-"
-        case .multiply: result = first * second
-            symbol = "×"
-        case .divide: result = first / second
-            symbol = "÷"
+        for i in 0..<operations.count {
+            let op = operations[i]
+            let num = numbers[i + 1]
+            
+            switch op {
+            case .add: result += num
+            case .subtract: result -= num
+            case .multiply: result *= num
+            case .divide: result /= num
+            }
         }
         
-        expressionLabel.text = "\(formatResult(first)) \(symbol) \(formatResult(second))"
+        expressionLabel.text! = numbers.map { formatResult($0) }
+            .enumerated()
+            .map { index, num in
+                index < operations.count ? "\(num) \(symbol(for: operations[index]))" : "\(num)"
+            }
+            .joined(separator: " ")
         resultLabel.text = formatResult(result)
         
-        firstNumber = nil
-        currentOperation = nil
+        numbers.removeAll()
+        operations.removeAll()
         isTypingNumber = false
     }
     
-    @objc private func handleSwipe() {
-        guard var text = resultLabel.text, text.count > 0 else { return }
+    private func symbol(for op: Operation) -> String {
+        switch op {
+        case .add: return "+"
+        case .subtract: return "-"
+        case .multiply: return "×"
+        case .divide: return "÷"
+        }
+    }
+    
+    @objc private func acPressed() {
+        animateButton(buttonAC)
         
-        text.removeLast()
+        resultLabel.text = "0"
+        numbers.removeAll()
+        operations.removeAll()
+        isTypingNumber = false
         
-        if text.isEmpty {
+        expressionLabel.text = ""
+    }
+
+    
+    @objc private func handleSwipe(_ gesture: UISwipeGestureRecognizer) {
+        if gesture.state == .ended {
             resultLabel.text = "0"
+            numbers.removeAll()
+            operations.removeAll()
             isTypingNumber = false
-        } else {
-            resultLabel.text = text
+            expressionLabel.text = ""
         }
     }
     
@@ -290,17 +313,6 @@ class ViewController: UIViewController {
                 button.transform = .identity
             }
         }
-    }
-    
-    @objc private func acPressed() {
-        animateButton(buttonAC)
-        
-        resultLabel.text = "0"
-        firstNumber = nil
-        currentOperation = nil
-        isTypingNumber = false
-        
-        expressionLabel.text = ""
     }
 }
 
